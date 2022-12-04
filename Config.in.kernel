@@ -5,6 +5,21 @@
 menu "Kernel Image Storage Setup"
 	depends on LINUX_IMAGE
 
+config MANUALLY_OVERRIDE_CMDLINE
+	bool "Override the config kernel command-line with manual string"
+	default n
+	help
+	  The board will override the kernel command-line which specified through the config.
+
+if MANUALLY_OVERRIDE_CMDLINE
+
+config MANUAL_LINUX_KERNEL_ARG_STRING
+	depends on LOAD_LINUX
+	string "Linux kernel command-line"
+	default ""
+
+endif 
+
 config OVERRIDE_CMDLINE
 	bool "Override the config kernel command-line"
 	default n

@@ -161,6 +161,7 @@ MEMORY := $(strip $(subst ",,$(CONFIG_MEMORY)))
 IMAGE_NAME:= $(strip $(subst ",,$(CONFIG_IMAGE_NAME)))
 CARD_SUFFIX := $(strip $(subst ",,$(CONFIG_CARD_SUFFIX)))
 LINUX_KERNEL_ARG_STRING := $(strip $(subst ",,$(CONFIG_LINUX_KERNEL_ARG_STRING)))
+MANUAL_LINUX_KERNEL_ARG_STRING := $(strip $(subst ",,$(CONFIG_MANUAL_LINUX_KERNEL_ARG_STRING)))
 LINUX_KERNEL_ARG_STRING_FILE := $(strip $(subst ",,$(CONFIG_LINUX_KERNEL_ARG_STRING_FILE)))
 
 # Device definitions
