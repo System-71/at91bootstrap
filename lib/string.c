@@ -71,6 +71,23 @@ char *strcpy(char *dst, const char *src)
 	return bak;
 }
 
+char *strncpy(char *dst, const char *src, size_t n)
+{
+	if (n != 0) {
+		char *d = dst;
+		const char *s = src;
+		do {
+			if ((*d++ = *s++) == 0) {
+				/* NUL pad the remaining n-1 bytes */
+				while (--n != 0)
+					*d++ = 0;
+				break;
+			}
+		} while (--n != 0);
+	}
+	return (dst);
+}
+
 char *strcat(char *dst, const char *src)
 {
 	char *p = dst;
@@ -185,4 +202,22 @@ void *memmove(void *dst, const void *src, unsigned int cnt)
 		}
 
 	return dst;
+}
+
+int atoi(char* str)
+{
+    // Initialize result
+    int res = 0;
+
+    // Iterate through all characters
+    // of input string and update result
+    // take ASCII character of corresponding digit and
+    // subtract the code from '0' to get numerical
+    // value and multiply res by 10 to shuffle
+    // digits left to update running total
+    for (int i = 0; str[i] != '\0'; ++i)
+        res = res * 10 + str[i] - '0';
+
+    // return result.
+    return res;
 }

@@ -21,6 +21,10 @@
 #include "tz_utils.h"
 #include "secure.h"
 
+#include "arch/at91-qspi/qspi.h"
+#include "spi_flash/spi_nor.h"
+#include "at91-qspi/qspi-common.h"
+
 #include "debug.h"
 
 static char cmdline_buf[256];
@@ -354,6 +358,13 @@ __attribute__((weak)) char *board_override_cmd_line(void)
 	return CMDLINE;
 }
 
+#ifdef CONFIG_LINUX_IMAGE_DUAL_BOOT
+__attribute__((weak)) unsigned char* dual_bank_scratch_target(void)
+{
+	return (unsigned char*) SCRATCH_ADDR;
+}
+#endif 
+
 int load_kernel(struct image_info *image)
 {
 	unsigned char *addr;
@@ -362,6 +373,11 @@ int load_kernel(struct image_info *image)
 	unsigned int mach_type;
 	int ret;
 	unsigned int mem_size;
+#ifdef CONFIG_LINUX_IMAGE_DUAL_BOOT
+	unsigned char* scratch_offset;
+	unsigned char sector[2];
+	unsigned char target;
+#endif 
 
 #if defined(CONFIG_SDRAM)
 	mem_size = get_sdram_size();
@@ -412,6 +428,74 @@ int load_kernel(struct image_info *image)
 			break;
 	}
 	bootargs = cmdline_buf;
+
+
+#ifdef CONFIG_LINUX_IMAGE_DUAL_BOOT
+
+        const struct spi_flash_hwcaps hwcaps = {
+                .mask = (SFLASH_HWCAPS_READ_MASK |
+                         SFLASH_HWCAPS_PP_MASK),
+        };
+        struct spi_flash flash;
+        struct qspi_priv qspi;
+
+        memset(&qspi, 0, sizeof(qspi));
+        qspi.reg_base = CONFIG_SYS_BASE_QSPI;
+        qspi.mem = (void *)CONFIG_SYS_BASE_QSPI_MEM;
+        qspi.mmap_size = CONFIG_SYS_QSPI_MEM_SIZE;
+
+        memset(&flash, 0, sizeof(flash));
+        flash.ops = &qspi_ops;
+        spi_flash_set_priv(&flash, &qspi);
+
+        /* Init the SPI controller. */
+        ret = spi_flash_init(&flash);
+        if (ret) {
+                dbg_info("SF: Fail to initialize spi\n");
+                return -1;
+        }
+
+        /* Probe the SPI flash memory. */
+        ret = spi_nor_probe(&flash, &hwcaps);
+        if (ret) {
+                dbg_info("SF: Fail to probe SPI flash\n");
+                spi_flash_cleanup(&flash);
+                return -1;
+        }
+
+	scratch_offset = "0x600000"; //TODO actually read offset from config using dual_bank_scratch_target()
+	spi_flash_read(&flash, 0x600000, 2, &sector[0]);
+        target = sector[0];	
+
+	char partition[20] = {'\0'};
+	int key=0;
+	int len=(strlen(bootargs)-5);
+
+	for (int i=0; i < len; i++){
+		if(strncmp((char*) bootargs+i,"root=",5)==0){
+			strncpy(&partition[0], (char *) bootargs+i, 19);
+			dbg_info("default partition is %s\n", partition);
+			key = i+18;
+			break;
+		}
+	}
+
+	dbg_info("\nTarget @ %s\n", scratch_offset);
+
+	switch(target){
+		case 0:
+			target='1';
+			break;
+		case 1:
+			target='2';
+			break;
+		default:
+			target='1';
+	}
+
+	dbg_info("setting partition to %u\n", target);
+	bootargs[key] = (unsigned char) target;
+#endif
 
 	ret = load_kernel_image(image);
 	if (ret)

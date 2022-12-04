@@ -20,6 +20,13 @@ config MANUAL_LINUX_KERNEL_ARG_STRING
 
 endif 
 
+if !MANUALLY_OVERRIDE_CMDLINE
+config LINUX_KERNEL_ARG_STRING
+	depends on LOAD_LINUX
+	string "Linux kernel command-line"
+	default "CONFIG_ARG_CONSOLE CONFIG_ARG_MTD CONFIG_ARG_ROOT CONFIG_ARG_ROOTFSTYPE CONFIG_ARG_DELAY CONFIG_ARG_CMA CONFIG_ARG_RW CONFIG_ARG_ROOTWAIT"
+endif
+
 config OVERRIDE_CMDLINE
 	bool "Override the config kernel command-line"
 	default n
@@ -27,11 +34,6 @@ config OVERRIDE_CMDLINE
 	  The board will override the kernel command-line which specified through the config.
 
 if OVERRIDE_CMDLINE
-
-config LINUX_KERNEL_ARG_STRING
-	depends on LOAD_LINUX
-	string "Linux kernel command-line"
-	default "CONFIG_ARG_CONSOLE CONFIG_ARG_MTD CONFIG_ARG_ROOT CONFIG_ARG_ROOTFSTYPE CONFIG_ARG_DELAY CONFIG_ARG_CMA CONFIG_ARG_RW CONFIG_ARG_ROOTWAIT"
 
 config ARG_CMA
 	string "Linux bootparam: Contiguous Memory Area support"
@@ -140,7 +142,21 @@ config OF_ADDRESS
 	default "0x61000000" if SAMA7G5
 	default "0x21000000"
 
-
 endmenu
 
+menu "Dual Boot Support"
+
+config LINUX_IMAGE_DUAL_BOOT
+	depends on LOAD_LINUX
+	bool "Support redundant dtb & kernel partitions in flash for firmware updates"
+	default n
+	help
+	  Enable if you need AT91 to select boot bank based on user scratch settings saved in QSPI.
+
+config OF_SCRATCH_ADDRESS_STRING
+	depends on LINUX_IMAGE_DUAL_BOOT
+	string "The address for 4KB sector in QSPI that AT91 will check for determining valid boot bank (bank 0 or 1)"
+	default "0x600000"
+
+endmenu
 endmenu
