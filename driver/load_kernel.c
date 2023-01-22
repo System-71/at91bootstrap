@@ -24,6 +24,7 @@
 #include "arch/at91-qspi/qspi.h"
 #include "spi_flash/spi_nor.h"
 #include "at91-qspi/qspi-common.h"
+#include "hlcdc.h"
 
 #include "debug.h"
 

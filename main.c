@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "common.h"
+#include "debug.h"
 #include "board.h"
 #include "usart.h"
 #include "slowclk.h"
@@ -16,6 +17,10 @@
 #include "autoconf.h"
 #include "optee.h"
 #include "sfr_aicredir.h"
+
+#ifdef CONFIG_LCD
+#include "hlcdc.h"
+#endif
 
 #ifdef CONFIG_CACHES
 #include "l1cache.h"
@@ -41,6 +46,32 @@ int main(void)
 	int ret = 0;
 
 	hw_init();
+
+/* enable display early */
+#if defined(CONFIG_LCD)
+
+	/* video diplay buffer */
+
+	#define VID_SIZE_BYTES 400*240*2 // 400*240*16BPP/ (8bits/byte) [bytes]
+
+	unsigned long addr = 0x24000000;  // copy to last 8K sector in 128KB DRAM region
+	unsigned int* frame; // each uint can hold 2 pixels
+
+	frame = (unsigned int*) addr;
+
+	for (int j=0; j<VID_SIZE_BYTES/2; j++) {
+		frame[j] = 0x77777777;//0xFFFFFFFF;
+	}
+
+	dbg_info("frame buffer is %x bytes\n", VID_SIZE_BYTES);
+	dbg_info("test pixel[128] is %x\n", frame[128]);
+
+
+	struct video_buf vid = {.size = sizeof(frame), .base = addr };
+
+	ret = hlcdc_init(&vid);
+
+#endif /* #ifdef CONFIG_LCD */
 
 #ifdef CONFIG_OCMS_STATIC
 	ocms_init_keys();
@@ -141,6 +172,7 @@ int main(void)
 	slowclk_switch_osc32();
 #endif
 #endif
+
 
 #if defined(CONFIG_LOAD_OPTEE)
 	/* Will never return since we will jump to OP-TEE in secure mode */

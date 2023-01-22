@@ -1063,5 +1063,12 @@ config SFRBU
 	default y
 	help
 	  SFRBU support
+
+config LCD
+	bool "LCD support"
+	depends on SAM9X60
+	default n
+	help
+	  support atmel HLCDC controller
 endmenu
 

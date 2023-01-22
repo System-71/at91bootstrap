@@ -26,6 +26,7 @@
 #include "board.h"
 #include "led.h"
 #include "nand.h"
+#include "hlcdc.h"
 
 #ifdef CONFIG_MMU
 #include "mmu_cp15.h"
@@ -279,6 +280,53 @@ void twi_init()
 }
 #endif
 
+#ifdef CONFIG_LCD
+
+#define ATMEL_LCDC_GCKDIV_VALUE     1
+void at91_lcdc_hw_init(void)
+{
+	dbg_info("configuring LCD pins and peripheral clock\n");
+	const struct pio_desc lcd_pins[] = {
+		{"LCD_VSYNC",	AT91C_PIN_PC(27), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_HSYNC",	AT91C_PIN_PC(28), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_DEN",	AT91C_PIN_PC(29), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_PCLK",	AT91C_PIN_PC(30), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D0",	AT91C_PIN_PC(0), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D1",	AT91C_PIN_PC(1), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D2",	AT91C_PIN_PC(2), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D3",	AT91C_PIN_PC(3), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D4",	AT91C_PIN_PC(4), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D5",	AT91C_PIN_PC(5), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D6",	AT91C_PIN_PC(6), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D7",	AT91C_PIN_PC(7), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D8",	AT91C_PIN_PC(8), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D9",	AT91C_PIN_PC(9), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D10",	AT91C_PIN_PC(10), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D11",	AT91C_PIN_PC(11), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D12",	AT91C_PIN_PC(12), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D13",	AT91C_PIN_PC(13), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D14",	AT91C_PIN_PC(14), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D15",	AT91C_PIN_PC(15), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D16",	AT91C_PIN_PC(16), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D17",	AT91C_PIN_PC(17), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D18",	AT91C_PIN_PC(18), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D19",	AT91C_PIN_PC(19), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D20",	AT91C_PIN_PC(20), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D21",	AT91C_PIN_PC(21), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D22",	AT91C_PIN_PC(22), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_D23",	AT91C_PIN_PC(23), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_DISPEN",	AT91C_PIN_PC(24), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{(char *)0, 0, 0, PIO_DEFAULT, PIO_PERIPH_A},
+	};
+	pio_configure(lcd_pins);
+
+	pmc_enable_periph_clock(AT91C_ID_LCDC, PMC_PERIPH_CLK_DIVIDER_NA);
+	pmc_enable_generic_clock(AT91C_ID_LCDC,
+				 GCK_CSS_MCK_CLK,
+				 ATMEL_LCDC_GCKDIV_VALUE); 
+}
+#endif /* #ifdef CONFIG_LCD */
+
 void hw_init(void)
 {
 	unsigned int reg;
@@ -341,6 +389,11 @@ void hw_init(void)
 	/* Perform the WILC initialization sequence */
 	wilc_pwrseq();
 #endif
+
+#ifdef CONFIG_LCD
+	(void) at91_lcdc_hw_init();
+#endif 
+
 }
 
 #ifdef CONFIG_DATAFLASH
@@ -407,6 +460,8 @@ void at91_sdhc_hw_init(void)
 #endif
 }
 #endif /* #ifdef CONFIG_SDCARD */
+
+
 
 #ifdef CONFIG_NANDFLASH
 void nandflash_hw_init(void)
@@ -614,3 +669,4 @@ void mmu_tlb_init(unsigned int *tlb)
 	           | TTB_TYPE_SECT;
 }
 #endif /* #ifdef CONFIG_MMU */
+
