@@ -103,7 +103,7 @@ void qspi_writel(u32 value, struct qspi_priv *qspi, u32 reg)
 	writel(value, qspi->reg_base + reg);
 }
 
-int qspi_loadimage(struct image_info *image)
+int qspi_loadimage(struct image_info *image, int bootable)
 {
 	const struct spi_flash_hwcaps hwcaps = {
 		.mask = (SFLASH_HWCAPS_READ_MASK |
@@ -137,7 +137,7 @@ int qspi_loadimage(struct image_info *image)
 		return -1;
 	}
 
-	return spi_flash_loadimage(&flash, image);
+	return spi_flash_loadimage(&flash, image, bootable);
 }
 
 int qspi_xip(struct spi_flash *flash, void **mem)

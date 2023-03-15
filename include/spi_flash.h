@@ -7,6 +7,6 @@
 #ifndef __SPI_FLASH_H__
 #define __SPI_FLASH_H__
 
-int spi_flash_loadimage(struct image_info *image);
+int spi_flash_loadimage(struct image_info *image, int bootable);
 
 #endif

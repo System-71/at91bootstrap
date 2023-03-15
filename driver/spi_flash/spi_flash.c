@@ -194,6 +194,7 @@ static int update_image_length(struct spi_flash *flash,
 	int ret;
 
 	ret = spi_flash_read(flash, offset, length, dest);
+	dbg_info("read ret = %x", ret);
 	if (ret)
 		return -1;
 
@@ -202,6 +203,7 @@ static int update_image_length(struct spi_flash *flash,
 #ifdef CONFIG_OF_LIBFDT
 	else {
 		ret = check_dt_blob_valid((void *)dest);
+		dbg_info("dt_blob ret = %x", ret );
 		if (!ret)
 			return of_get_dt_total_size((void *)dest);
 	}
@@ -280,12 +282,30 @@ int spi_flash_recovery(struct spi_flash *flash)
 }
 #endif /* CONFIG_DATAFLASH_RECOVERY */
 
-int spi_flash_loadimage(struct spi_flash *flash, struct image_info *image)
+int spi_flash_loadimage(struct spi_flash *flash, struct image_info *image, int bootable)
 {
+
+	int ret = 0;
+
+	if (bootable == 0) {
+		/* just copy the data and return */
+		dbg_info("SF: Copy %x bytes from %x to %x\n",
+			 image->length, image->offset, image->dest);
+		ret = spi_flash_read(flash,
+				     image->offset,
+				     image->length,
+				     image->dest);
+		if (ret) {
+			dbg_info("** SF: Serial flash read error**\n");
+			ret = -1;
+			goto err_exit;
+		}
+		return 0;
+	}
+
 #if defined(CONFIG_LOAD_LINUX) || defined(CONFIG_LOAD_ANDROID)
 	int length;
 #endif
-	int ret = 0;
 
 #ifdef CONFIG_DATAFLASH_RECOVERY
 	if (!spi_flash_recovery(flash)) {
@@ -332,6 +352,7 @@ int spi_flash_loadimage(struct spi_flash *flash, struct image_info *image)
 #else /* CONFIG_QSPI_XIP */
 
 #if defined(CONFIG_LOAD_LINUX) || defined(CONFIG_LOAD_ANDROID)
+
 	length = update_image_length(flash,
 				     image->offset,
 				     image->dest,
@@ -342,6 +363,7 @@ int spi_flash_loadimage(struct spi_flash *flash, struct image_info *image)
 	}
 
 	image->length = length;
+
 #endif
 
 	dbg_info("SF: Copy %x bytes from %x to %x\n",
@@ -355,6 +377,7 @@ int spi_flash_loadimage(struct spi_flash *flash, struct image_info *image)
 		ret = -1;
 		goto err_exit;
 	}
+
 #endif /* !CONFIG_QSPI_XIP */
 
 err_exit:

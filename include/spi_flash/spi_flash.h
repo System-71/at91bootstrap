@@ -505,7 +505,7 @@ int spi_flash_setup(struct spi_flash *flash,
 		    const struct spi_flash_parameters *params,
 		    const struct spi_flash_hwcaps *hwcaps);
 
-int spi_flash_loadimage(struct spi_flash *flash, struct image_info *image);
+int spi_flash_loadimage(struct spi_flash *flash, struct image_info *image, int bootable);
 
 static inline int spi_flash_read_sr(struct spi_flash *flash, u8 *sr)
 {

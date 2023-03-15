@@ -55,7 +55,7 @@ struct image_info
 #endif
 };
 
-typedef int (*load_function)(struct image_info *image);
+typedef int (*load_function)(struct image_info *image, int bootable);
 
 #ifdef CONFIG_LOAD_SW
 

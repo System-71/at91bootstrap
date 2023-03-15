@@ -340,7 +340,7 @@ static int load_kernel_image(struct image_info *image)
 	int ret;
 	load_function load_func = get_image_load_func();
 
-	ret = load_func(image);
+	ret = load_func(image, 1);
 	if (ret)
 		return ret;
 
@@ -391,10 +391,12 @@ int load_kernel(struct image_info *image)
 	void (*kernel_entry)(int zero, int arch, unsigned int params);
 
 	bootargs = board_override_cmd_line();
+
 	if (sizeof(cmdline_buf) < 10 + strlen(bootargs)){
 		dbg_very_loud("\nKERNEL: buffer for bootargs is too small\n\n");
 		return -1;
 	}
+
 	switch(mem_size){
 		case 0x800000:
 			memcpy(cmdline_buf, "mem=8M ", 7);
@@ -417,7 +419,11 @@ int load_kernel(struct image_info *image)
 			memcpy(&cmdline_buf[9], bootargs, strlen(bootargs));
 			break;
 		case 0x10000000:
-			memcpy(cmdline_buf, "mem=256M ", 9);
+			#ifdef CONFIG_LCD
+				memcpy(cmdline_buf, "mem=254M ", 9); // preserve last 1MB frame buffer to protect linux init from overwriting
+			#else
+				memcpy(cmdline_buf, "mem=256M ", 9); 
+			#endif
 			memcpy(&cmdline_buf[9], bootargs, strlen(bootargs));
 			break;
 		case 0x20000000:
@@ -464,8 +470,8 @@ int load_kernel(struct image_info *image)
                 return -1;
         }
 
-	scratch_offset = "0x600000"; //TODO actually read offset from config using dual_bank_scratch_target()
-	spi_flash_read(&flash, 0x600000, 2, &sector[0]);
+	scratch_offset = "0x700000"; //TODO actually read offset from config using dual_bank_scratch_target()
+	spi_flash_read(&flash, 0x700000, 2, &sector[0]);
         target = sector[0];	
 
 	char partition[20] = {'\0'};
@@ -541,6 +547,7 @@ int load_kernel(struct image_info *image)
 
 	dbg_info("\nKERNEL: Starting linux kernel ..., machid: %x\n\n",
 							mach_type);
+
 #if defined(CONFIG_ENTER_NWD)
 	monitor_init();
 

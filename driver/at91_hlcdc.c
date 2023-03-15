@@ -10,6 +10,8 @@
 
 #define BASE_LCDC 0xf8038000
 
+extern struct hlcdc_dma_desc dma_desc;
+
 static inline unsigned int hlcdc_readl(unsigned int reg)
 {
         return readl(BASE_LCDC + reg);
@@ -178,18 +180,18 @@ int hlcdc_init(struct video_buf* vid){
 
 	// setup bus access
 	//
-	//val = hlcdc_readl(0x8C); //basecfg0
-	//hlcdc_writel(0x8C, val | (1 << 8) | (1 << 4));
+	val = hlcdc_readl(0x8C); //basecfg0
+	hlcdc_writel(0x8C, val | (1 << 8) | (1 << 4));
 
-	hlcdc_writel(0x90, (3 << 4)); // baseceg1, 18BPP RGB666
+	hlcdc_writel(0x90, (3 << 4)); // baseceg1, 16BPP RGB565
+
+	hlcdc_writel(0x94, (0x00));  // horizontal stride
 
 	hlcdc_writel(0x9C, (1 << 8)); // baseceg4, use DMA channel
 
 	// need DMA shit here !
 	//
 	//
-	
-	struct hlcdc_dma_desc dma_desc;
 
 	dma_desc.address = vid->base;
 	dma_desc.control = LCDC_LCDC_BASECTRL_DFETCH_EN | LCDC_LCDC_BASECTRL_DONEIEN_EN;
@@ -254,12 +256,6 @@ int hlcdc_init(struct video_buf* vid){
 	dbg_info("\n After queuing \nBASE_SR = %x\n", hlcdc_readl(0x68));
 	dbg_info("BASEISR = %x\n", hlcdc_readl(LCDC_LCDC_BASEISR));
 
-	// kernel seems to be clobbering our boot image immediately when this is removed
-	// my guess is it is because we enabled console output to LCD in kernel meaning it inits display immediately ?
-	// either way still critical since UI application will launch after some delay as part of init script
-	//while (1) {
-//
-//	}
 	return ret;
 }
 
