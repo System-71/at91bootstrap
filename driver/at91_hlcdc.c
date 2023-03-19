@@ -63,7 +63,7 @@ static inline int hlcdc_readl_with_timeout_clear(unsigned int reg, unsigned int 
 	return ret;
 }
 
-int hlcdc_init(struct video_buf* vid){
+int hlcdc_init(void){
 
 	int ret = 0;
 	unsigned int val;
@@ -137,11 +137,11 @@ int hlcdc_init(struct video_buf* vid){
 
 	/* Setup Control reg 1 */
 
-	// set VSYNC pulse-width to 20 lines
-	// set HSYNC pulse-width to 4 PCLK cycles
+	// set VSYNC pulse-width to 2 lines
+	// set HSYNC pulse-width to 10 PCLK cycles
         val = hlcdc_readl(LCDC_LCDCFG1);
-        hlcdc_writel(LCDC_LCDCFG1, val | (((20-1) << LCDC_LCDCFG1_VSYNCPW_SHIFT) & LCDC_LCDCFG1_VSYNCPW_MASK) 
-			| ((4-1) & LCDC_LCDCFG1_HSYNCPW_MASK));
+        hlcdc_writel(LCDC_LCDCFG1, val | (((2-1) << LCDC_LCDCFG1_VSYNCPW_SHIFT) & LCDC_LCDCFG1_VSYNCPW_MASK) 
+			| ((10-1) & LCDC_LCDCFG1_HSYNCPW_MASK));
 
         val = hlcdc_readl(LCDC_LCDCFG1);
 	dbg_info("cfg1 = %x\n", val);
@@ -151,8 +151,8 @@ int hlcdc_init(struct video_buf* vid){
 	// set Vertical back porch width to 2 lines
 	// set Vertical front porch width to 4 lines
         val = hlcdc_readl(LCDC_LCDCFG2);
-        hlcdc_writel(LCDC_LCDCFG2, val | (((11-1) << LCDC_LCDCFG2_VBPW_SHIFT) & LCDC_LCDCFG2_VBPW_MASK)
-			| ((10-1) & LCDC_LCDCFG2_VFBPW_MASK));
+        hlcdc_writel(LCDC_LCDCFG2, val | (((2-1) << LCDC_LCDCFG2_VBPW_SHIFT) & LCDC_LCDCFG2_VBPW_MASK)
+			| ((4-1) & LCDC_LCDCFG2_VFBPW_MASK));
 
         val = hlcdc_readl(LCDC_LCDCFG2);
 	dbg_info("cfg1 = %x\n", val);
@@ -162,8 +162,8 @@ int hlcdc_init(struct video_buf* vid){
 	// set Horizontal back porch width to 20 PCLK cycles
 	// set Horizontal front porch width to 10 PCLK cycles
         val = hlcdc_readl(LCDC_LCDCFG3);
-        hlcdc_writel(LCDC_LCDCFG3, val | (((2-1) << LCDC_LCDCFG3_HBPW_SHIFT) & LCDC_LCDCFG3_HBPW_MASK)
-			| ((2-1) & LCDC_LCDCFG3_HFPW_MASK));
+        hlcdc_writel(LCDC_LCDCFG3, val | (((20-1) << LCDC_LCDCFG3_HBPW_SHIFT) & LCDC_LCDCFG3_HBPW_MASK)
+			| ((10-1) & LCDC_LCDCFG3_HFPW_MASK));
 
         val = hlcdc_readl(LCDC_LCDCFG3);
 	dbg_info("cfg3 = %x\n", val);
@@ -187,23 +187,7 @@ int hlcdc_init(struct video_buf* vid){
 
 	hlcdc_writel(0x94, (0x00));  // horizontal stride
 
-	hlcdc_writel(0x9C, (1 << 8)); // baseceg4, use DMA channel
 
-	// need DMA shit here !
-	//
-	//
-
-	dma_desc.address = vid->base;
-	dma_desc.control = LCDC_LCDC_BASECTRL_DFETCH_EN | LCDC_LCDC_BASECTRL_DONEIEN_EN;
-
-	dma_desc.next = &dma_desc; // point to itself
-
-	hlcdc_writel(LCDC_LCDC_BASEADDR, dma_desc.address);
-	hlcdc_writel(LCDC_LCDC_BASECTRL, dma_desc.control);
-	hlcdc_writel(LCDC_LCDC_NEXTADDR, dma_desc.next);
-
-	hlcdc_writel(LCDC_LCDC_BASECHEN, LCDC_LCDC_BASECHEN_CHEN_EN | LCDC_LCDC_BASECHEN_UPDATEN_EN);
-	
 	/* Enable LCD */
 
 	val = hlcdc_readl(LCDC_LCDEN);
@@ -244,18 +228,26 @@ int hlcdc_init(struct video_buf* vid){
 		dbg_info("Error setting LCD_PWMEN\n");
 	}
 
-	dbg_info("\nBASE_SR = %x\n", hlcdc_readl(0x68));
-	dbg_info("BASEISR = %x\n", hlcdc_readl(LCDC_LCDC_BASEISR));
-
-
-	/* queue next DMA descriptor */
-	//hlcdc_writel(LCDC_LCDC_HEADADDR, dma_desc.address);
-        //val = hlcdc_readl(LCDC_LCDC_BASECHEN);
-        //hlcdc_writel(LCDC_LCDC_BASECHEN, val | LCDC_LCDC_BASECHEN_CHEN_EN | LCDC_LCDC_BASECHEN_AQEN_EN);
-
-	dbg_info("\n After queuing \nBASE_SR = %x\n", hlcdc_readl(0x68));
-	dbg_info("BASEISR = %x\n", hlcdc_readl(LCDC_LCDC_BASEISR));
-
 	return ret;
+}
+
+int hlcdc_dma_start(unsigned long addr) {
+
+	hlcdc_writel(0x9C, (1 << 8)); // baseceg4, use DMA channel	
+
+	// need DMA shit here !
+	//
+	//
+
+	dma_desc.address = addr;
+	dma_desc.control = LCDC_LCDC_BASECTRL_DFETCH_EN | LCDC_LCDC_BASECTRL_DONEIEN_EN;
+
+	dma_desc.next = &dma_desc; // point to itself
+
+	hlcdc_writel(LCDC_LCDC_BASEADDR, dma_desc.address);
+	hlcdc_writel(LCDC_LCDC_BASECTRL, dma_desc.control);
+	hlcdc_writel(LCDC_LCDC_NEXTADDR, dma_desc.next);
+
+	hlcdc_writel(LCDC_LCDC_BASECHEN, LCDC_LCDC_BASECHEN_CHEN_EN | LCDC_LCDC_BASECHEN_UPDATEN_EN);
 }
 

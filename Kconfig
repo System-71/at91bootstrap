@@ -1070,5 +1070,17 @@ config LCD
 	default n
 	help
 	  support atmel HLCDC controller
+config LCD_BOOT_SPLASH
+	bool "LCD display bitmap image"
+	depends on LCD
+	default n 
+	help
+	  choose to display bitmap image on boot
+config LCD_BITMAP_OFFSET_STRING
+	string "LCD display bitmap image offset"
+	depends on LCD_BOOT_SPLASH
+	default 0x0
+	help
+	  offset in flash storage for bitmap image
 endmenu
 

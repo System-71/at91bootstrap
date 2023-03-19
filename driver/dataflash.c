@@ -6,7 +6,7 @@
 #include "spi_flash.h"
 #include "qspi_flash.h"
 
-int load_dataflash(struct image_info *image)
+int load_dataflash(struct image_info *image, int bootable)
 {
 	int ret = 0;
 

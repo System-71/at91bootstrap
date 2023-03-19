@@ -23,6 +23,7 @@ extern char *strstr(const char *s, const char *what);
 extern void *memchr(void *ptr, int value, unsigned int num);
 extern void *memmove(void *dest, const void *src, unsigned int count);
 extern int atoi(char* str);
+extern int atoh(char* str);
 
 extern int consttime_memequal(const void *b1, const void *b2, size_t len);
 

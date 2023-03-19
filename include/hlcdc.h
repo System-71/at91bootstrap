@@ -1,6 +1,3 @@
-
-
-
 #ifndef HLCDC_H_
 #define HLCDC_H_
 
@@ -134,12 +131,8 @@ struct hlcdc_dma_desc {
 	unsigned int next;
 };
 
-struct video_buf {
-	unsigned int size;
-	unsigned long base;
-};
-
-extern int hlcdc_init(struct video_buf* vid_buf);
+extern int hlcdc_init(void);
+extern int hlcdc_dma_start(unsigned long addr);
 
 #endif
 
