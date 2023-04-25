@@ -1070,6 +1070,12 @@ config LCD
 	default n
 	help
 	  support atmel HLCDC controller
+config LCD_SPI
+	bool "support flexcom SPI interface to control LCD"
+	depends on LCD
+	default n 
+	help
+	  enable if LCD requires SPI flexcom for config
 config LCD_BOOT_SPLASH
 	bool "LCD display bitmap image"
 	depends on LCD

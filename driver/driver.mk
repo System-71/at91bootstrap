@@ -113,3 +113,4 @@ COBJS-$(CONFIG_CACHES)		+= $(DRIVERS_SRC)/l1cache.o
 COBJS-$(CONFIG_MMU)		+= $(DRIVERS_SRC)/mmu.o
 COBJS-$(CONFIG_LCD)	        += $(DRIVERS_SRC)/at91_hlcdc.o
 COBJS-$(CONFIG_LCD_BOOT_SPLASH) += $(DRIVERS_SRC)/bitmap.o
+COBJS-$(CONFIG_LCD_SPI)         += $(DRIVERS_SRC)/spi_lcd.o

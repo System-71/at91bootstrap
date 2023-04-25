@@ -2,7 +2,11 @@
 #define FRAME_BUFFER_ADDR 0x2FE00000
 #define BMP_COPY_ADDR     0x2FF00000
 
-#define VID_SIZE_BYTES 400*240*2 // 400*240*16BPP/ (8bits/byte) [bytes]
+#define VID_SIZE_BYTES 300*240*2 // 300*240*16BPP/ (8bits/byte) [bytes]
+#define VID_BPP 16
+
+// uncomment to flip X axis
+#define VID_X_MIRROR
 
 struct bitmap_header {
 	unsigned char header[2];
@@ -21,12 +25,22 @@ struct bitmap_dib_header {
 	int height;
 	unsigned char planes[2];
 	unsigned char bpp[2];
+	int compression;
+	int picsize;
+	int xpx_per_meter;
+	int ypx_per_meter;
+	int colors;
+	int important_colors;
+	unsigned int red_mask;
+	unsigned int green_mask;
+	unsigned int blue_mask;
+	unsigned int alpha_mask;
 };
 
 struct bitmap {
 	struct bitmap_header hdr;
 	struct bitmap_dib_header dib;
-	unsigned char* pixels;
+	unsigned int* pixels;
 };
 
 enum bitmap_bpp {

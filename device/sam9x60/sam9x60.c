@@ -59,6 +59,23 @@ static struct at91_flexcom flexcoms[] = {
 	{AT91C_ID_FLEXCOM12, FLEXCOM_TWI, AT91C_BASE_FLEXCOM12},
 };
 #endif
+#if defined(CONFIG_LCD_SPI)
+static struct at91_flexcom flexcoms[] = {
+	{AT91C_ID_FLEXCOM0, FLEXCOM_SPI, AT91C_BASE_FLEXCOM0},
+	{AT91C_ID_FLEXCOM1, FLEXCOM_SPI, AT91C_BASE_FLEXCOM1},
+	{AT91C_ID_FLEXCOM2, FLEXCOM_SPI, AT91C_BASE_FLEXCOM2},
+	{AT91C_ID_FLEXCOM3, FLEXCOM_SPI, AT91C_BASE_FLEXCOM3},
+	{AT91C_ID_FLEXCOM4, FLEXCOM_SPI, AT91C_BASE_FLEXCOM4},
+	{AT91C_ID_FLEXCOM5, FLEXCOM_SPI, AT91C_BASE_FLEXCOM5},
+	{AT91C_ID_FLEXCOM6, FLEXCOM_SPI, AT91C_BASE_FLEXCOM6},
+	{AT91C_ID_FLEXCOM7, FLEXCOM_SPI, AT91C_BASE_FLEXCOM7},
+	{AT91C_ID_FLEXCOM8, FLEXCOM_SPI, AT91C_BASE_FLEXCOM8},
+	{AT91C_ID_FLEXCOM9, FLEXCOM_SPI, AT91C_BASE_FLEXCOM9},
+	{AT91C_ID_FLEXCOM10, FLEXCOM_SPI, AT91C_BASE_FLEXCOM10},
+	{AT91C_ID_FLEXCOM11, FLEXCOM_SPI, AT91C_BASE_FLEXCOM11},
+	{AT91C_ID_FLEXCOM12, FLEXCOM_SPI, AT91C_BASE_FLEXCOM12},
+};
+#endif
 
 unsigned int usart_base = AT91C_BASE_DBGU;
 
@@ -315,7 +332,7 @@ void at91_lcdc_hw_init(void)
 		{"LCD_D21",	AT91C_PIN_PC(21), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
 		{"LCD_D22",	AT91C_PIN_PC(22), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
 		{"LCD_D23",	AT91C_PIN_PC(23), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
-		{"LCD_DISPEN",	AT91C_PIN_PC(24), 0, PIO_DRVSTR_HI | PIO_SLEWR_CTRL, PIO_PERIPH_A},
+		{"LCD_DISPEN",	AT91C_PIN_PC(24), 1, PIO_DEFAULT, PIO_OUTPUT},
 		{(char *)0, 0, 0, PIO_DEFAULT, PIO_PERIPH_A},
 	};
 	pio_configure(lcd_pins);
@@ -323,7 +340,37 @@ void at91_lcdc_hw_init(void)
 	pmc_enable_periph_clock(AT91C_ID_LCDC, PMC_PERIPH_CLK_DIVIDER_NA);
 	pmc_enable_generic_clock(AT91C_ID_LCDC,
 				 GCK_CSS_MCK_CLK,
-				 ATMEL_LCDC_GCKDIV_VALUE); 
+				 ATMEL_LCDC_GCKDIV_VALUE);
+}
+
+void spi_lcd_init(void) {
+        const struct pio_desc spi_pins[] = {
+        // FLEXCOM4
+                {"FLX_IO0", AT91C_PIN_PA(12), 0, PIO_DEFAULT, PIO_PERIPH_A},
+                {"FLX_IO1", AT91C_PIN_PA(11), 0, PIO_DEFAULT, PIO_PERIPH_A},
+                {"FLX_IO2", AT91C_PIN_PA(13), 0, PIO_DEFAULT, PIO_PERIPH_A},
+                {"FLX_IO3", AT91C_PIN_PA(14), 1, PIO_OPENDRAIN, PIO_PERIPH_A},
+                {"FLX_IO4", AT91C_PIN_PA(7), 1, PIO_OPENDRAIN, PIO_PERIPH_B},
+                {"FLX_IO5", AT91C_PIN_PA(8), 1, PIO_OPENDRAIN, PIO_PERIPH_C},
+                {"FLX_IO6", AT91C_PIN_PB(3), 1, PIO_OPENDRAIN, PIO_PERIPH_B},
+                {"CDX", AT91C_PIN_PD(4), 1, PIO_DEFAULT, PIO_OUTPUT},
+                {(char *)0, 0, 0, PIO_DEFAULT, PIO_PERIPH_A},
+        };
+        int ret = pio_configure(spi_pins);
+
+	if (ret == 0) {
+		dbg_info("[ERROR] pio_configure returned %x\n", ret);
+	}
+
+        pmc_enable_periph_clock(AT91C_ID_PIOD, PMC_PERIPH_CLK_DIVIDER_NA);
+
+        pmc_enable_periph_clock(13, PMC_PERIPH_CLK_DIVIDER_NA);
+
+        ret = flexcom_init(4);
+
+	if (ret != 0 ) {
+		dbg_info("[ERROR] flexcom_init returned %x\n", ret);
+	}
 }
 #endif /* #ifdef CONFIG_LCD */
 
@@ -351,6 +398,10 @@ void hw_init(void)
 			AT91C_PMC_PRES | AT91C_PMC_MDIV | AT91C_PMC_CSS);
 
 #if defined(CONFIG_TWI) || CONFIG_CONSOLE_INDEX != 0
+	flexcoms_init(flexcoms);
+#endif
+
+#if defined(CONFIG_LCD_SPI)
 	flexcoms_init(flexcoms);
 #endif
 
@@ -392,7 +443,11 @@ void hw_init(void)
 
 #ifdef CONFIG_LCD
 	(void) at91_lcdc_hw_init();
-#endif 
+#endif
+
+#ifdef CONFIG_LCD_SPI
+	(void) spi_lcd_init();
+#endif
 
 }
 

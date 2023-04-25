@@ -11,15 +11,68 @@ __attribute__((weak)) unsigned char* bitmap_location(void)
 }
 #endif
 
+unsigned long
+__udivmodsi4(unsigned long num, unsigned long den, int modwanted)
+{
+  unsigned long bit = 1;
+  unsigned long res = 0;
+
+  while (den < num && bit && !(den & (1L<<31)))
+    {
+      den <<=1;
+      bit <<=1;
+    }
+  while (bit)
+    {
+      if (num >= den)
+	{
+	  num -= den;
+	  res |= bit;
+	}
+      bit >>=1;
+      den >>=1;
+    }
+  if (modwanted) return num;
+  return res;
+}
+
+/*
+ * 32-bit signed integer divide.
+ */
+signed int __aeabi_idiv(signed int num, signed int den)
+{
+	signed int minus = 0;
+	signed int v;
+
+	if (num < 0)
+	{
+		num = -num;
+		minus = 1;
+	}
+	if (den < 0)
+	{
+		den = -den;
+		minus ^= 1;
+	}
+
+	v = __udivmodsi4(num, den, 0);
+	if (minus)
+		v = -v;
+
+	return v;
+}
+
 struct video_buf bitmap_frame_buffer_init() {
 
 	int ret = 0;
+	unsigned char* src;
+	unsigned char* dst;
 	struct image_info *img; 
 
 	struct video_buf vid;
 	memset(&vid, 0, sizeof(struct video_buf));
 
-	memset(img,		0, sizeof(struct image_info));
+	memset(img, 0, sizeof(struct image_info));
 
 	#if defined(CONFIG_DATAFLASH) || defined(CONFIG_NANDFLASH) || defined(CONFIG_FLASH)
 		img->length = 0x100000; // copy 1MB
@@ -66,8 +119,8 @@ struct video_buf bitmap_frame_buffer_init() {
 		/* not 4-byte aligned */
 		dbg_info("bitmap dbi header is not 4-byte aligned in memory. Copy to stack.\n");
 
-		unsigned char* dst = (unsigned char*) &stack_hdr;
-		unsigned char* src = (unsigned char*) &bmp->hdr;
+		dst = (unsigned char*) &stack_hdr;
+		src = (unsigned char*) &bmp->hdr;
 		for (int i=0; i < sizeof(struct bitmap_header); i++) {
 			dst[i] = src[i];
 		}
@@ -83,7 +136,7 @@ struct video_buf bitmap_frame_buffer_init() {
 		stack_dib = bmp->dib;
 	}
 	
-	bmp->pixels = (unsigned int*) (bmp + stack_hdr.offset[0]);
+	bmp->pixels = (unsigned int*) (((int)bmp) + stack_hdr.offset[0]);
 	bpp = (unsigned int)((0xFF00 & (stack_dib.bpp[1]) << 8) | stack_dib.bpp[0]);
 
 	int num_bytes = bpp*stack_dib.height*stack_dib.width/8;
@@ -96,44 +149,65 @@ struct video_buf bitmap_frame_buffer_init() {
 	char red=0;
 	char green=0;
 	char blue=0;
+	char alpha = 0;
 	char red16=0;
 	char green16=0;
 	char blue16=0;
+
+	unsigned int px = 0;
 
 	dbg_info("pixel address = %x\n", (int) bmp->pixels);
 	dbg_info("bpp = %d\n", (int)bpp);
 
 	int i = 0;
-	int offset = stack_dib.width; // center w.r.t to x-axis
-
+#ifdef VID_X_MIRROR
+	int physical_pos = stack_dib.width;
+	int key = ( VID_BPP / 8 )*stack_dib.width;
+	int line =1;
+#endif
 	for (int j=0; j < VID_SIZE_BYTES; j++) {
 		/* blank the screen */
 		frame[j] = 0x00;
 	}
 
-	for (int j=0; j < num_bytes; j++) {
+	for (int j=0; j < (num_bytes/4); j++) {
 
 		switch(bpp) {
 			case(BPP_32BIT):
 
-				if ( (j % (32/8)) == 0 ) {
-					// pixel every 4 bytes
-					red   = bmp->pixels[j-1];
-		   			green = bmp->pixels[j-2];
-		   			blue  = bmp->pixels[j-3];
+				px = bmp->pixels[j];
 
-					red16   = (red * ( 1 << 5 )/( 1 << 8 ) ) & 0x1F;
-					green16 = (green*( 1 << 6 )/( 1 << 8 ) ) & 0x3F;
-					blue16  = (blue *( 1 << 5 )/( 1 << 8 ) ) & 0x1F;
+				alpha = (px & stack_dib.alpha_mask) >> 24;
+				red   = (px & stack_dib.red_mask) >> 16;
+		   		green = (px & stack_dib.green_mask) >> 8;
+		   		blue  = px & stack_dib.blue_mask;
 
-					frame[i + offset]   = 0xFF & (red16 | ((0x7 & green16) << 5));
-					frame[i + offset + 1] = 0xFF & (green16 | ((0x1F & blue16) << 4));
-					i += 2;
+				red16   = ((unsigned int) ((red*0x1F) / 0x3F)) & 0x1F;
+				green16 = ((unsigned int) ((green*0x3F) / 0xFF)) & 0x3F;
+				blue16  = ((unsigned int) ((blue*0x1F) / 0x3F)) & 0x1F;
+				
+#ifndef VID_X_MIRROR
+				frame[i + 1]   = 0xFF & ((red16 << 3) | ((0x38 & green16) >> 3));
+				frame[i]   = 0xFF & (((0x7 & green16) << 5) | blue16);
+#else
+				key = (VID_BPP/8)*(line)*(stack_dib.width) - (stack_dib.width-physical_pos)*(VID_BPP/8);
+				
+				frame[key-1] = 0xFF & ((red16 << 3) | ((0x38 & green16) >> 3));
+				frame[key-2] = 0xFF & (((0x7 & green16) << 5) | blue16);
+				
+				if ( physical_pos == 1 ) {
+					physical_pos = stack_dib.width;
+					line++;
 				}
+				else {
+					physical_pos--;
+				}
+#endif
+				i+=( VID_BPP / 8 );
 				break; 
-			default:
-				dbg_info("Bitmap uses unsupported bits per pixel\n");
-				break;
+		default:
+			dbg_info("Bitmap uses unsupported bits per pixel\n");
+			break;
 		}
 	}
 

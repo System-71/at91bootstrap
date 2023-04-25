@@ -115,7 +115,7 @@ int hlcdc_init(void){
 	}
 
 	/* Setup Pixel Clock divider */
-	unsigned int ck_div = 9-2; // 100MHz GCK / (CLK_DIV + 2) = 100/(7+2) = 11.11MHz 
+	unsigned int ck_div = 11; // 100MHz GCK / (CLK_DIV + 2) = 100/(11+2) = 7.69MHz 
 
         val = hlcdc_readl(LCDC_LCDCFG0);
         hlcdc_writel(LCDC_LCDCFG0, val | ((ck_div << LCDC_LCDCFG0_CLKDIV_SHIFT) & LCDC_LCDCFG0_CLKDIV_MASK));
@@ -137,10 +137,10 @@ int hlcdc_init(void){
 
 	/* Setup Control reg 1 */
 
-	// set VSYNC pulse-width to 2 lines
+	// set VSYNC pulse-width to 4 lines
 	// set HSYNC pulse-width to 10 PCLK cycles
         val = hlcdc_readl(LCDC_LCDCFG1);
-        hlcdc_writel(LCDC_LCDCFG1, val | (((2-1) << LCDC_LCDCFG1_VSYNCPW_SHIFT) & LCDC_LCDCFG1_VSYNCPW_MASK) 
+        hlcdc_writel(LCDC_LCDCFG1, val | (((4-1) << LCDC_LCDCFG1_VSYNCPW_SHIFT) & LCDC_LCDCFG1_VSYNCPW_MASK) 
 			| ((10-1) & LCDC_LCDCFG1_HSYNCPW_MASK));
 
         val = hlcdc_readl(LCDC_LCDCFG1);
@@ -148,31 +148,31 @@ int hlcdc_init(void){
 
 	/* Setup Control reg 2 */
 
-	// set Vertical back porch width to 2 lines
-	// set Vertical front porch width to 4 lines
+	// set Vertical back porch width to 8 lines
+	// set Vertical front porch width to 8 lines
         val = hlcdc_readl(LCDC_LCDCFG2);
-        hlcdc_writel(LCDC_LCDCFG2, val | (((2-1) << LCDC_LCDCFG2_VBPW_SHIFT) & LCDC_LCDCFG2_VBPW_MASK)
-			| ((4-1) & LCDC_LCDCFG2_VFBPW_MASK));
+        hlcdc_writel(LCDC_LCDCFG2, val | (((8-1) << LCDC_LCDCFG2_VBPW_SHIFT) & LCDC_LCDCFG2_VBPW_MASK)
+			| ((8-1) & LCDC_LCDCFG2_VFBPW_MASK));
 
         val = hlcdc_readl(LCDC_LCDCFG2);
 	dbg_info("cfg1 = %x\n", val);
 
 	/* Setup Control reg 3 */
 
-	// set Horizontal back porch width to 20 PCLK cycles
-	// set Horizontal front porch width to 10 PCLK cycles
+	// set Horizontal back porch width to 10 PCLK cycles
+	// set Horizontal front porch width to 38 PCLK cycles
         val = hlcdc_readl(LCDC_LCDCFG3);
-        hlcdc_writel(LCDC_LCDCFG3, val | (((20-1) << LCDC_LCDCFG3_HBPW_SHIFT) & LCDC_LCDCFG3_HBPW_MASK)
-			| ((10-1) & LCDC_LCDCFG3_HFPW_MASK));
+        hlcdc_writel(LCDC_LCDCFG3, val | (((10-1) << LCDC_LCDCFG3_HBPW_SHIFT) & LCDC_LCDCFG3_HBPW_MASK)
+			| ((38-1) & LCDC_LCDCFG3_HFPW_MASK));
 
         val = hlcdc_readl(LCDC_LCDCFG3);
 	dbg_info("cfg3 = %x\n", val);
 
 	/* Setup Control reg 4 */
 
-	// 400V x 240H size
+	// 300V x 240H size
         val = hlcdc_readl(LCDC_LCDCFG4);
-        hlcdc_writel(LCDC_LCDCFG4, val | (((400-1) << LCDC_LCDCFG4_RPF_SHIFT) & LCDC_LCDCFG4_RPF_MASK)
+        hlcdc_writel(LCDC_LCDCFG4, val | (((300-1) << LCDC_LCDCFG4_RPF_SHIFT) & LCDC_LCDCFG4_RPF_MASK)
 			| ((240-1) & LCDC_LCDCFG4_PPL_MASK));
 
         val = hlcdc_readl(LCDC_LCDCFG4);
@@ -231,7 +231,7 @@ int hlcdc_init(void){
 	return ret;
 }
 
-int hlcdc_dma_start(unsigned long addr) {
+void hlcdc_dma_start(unsigned long addr) {
 
 	hlcdc_writel(0x9C, (1 << 8)); // baseceg4, use DMA channel	
 

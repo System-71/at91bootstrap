@@ -56,7 +56,11 @@ int main(void)
 
 /* enable display early */
 #if defined(CONFIG_LCD)
-
+	
+	#if defined(CONFIG_LCD_SPI)
+	spi_lcd_controller_init(4);
+	#endif
+	
 	ret = hlcdc_init();
 
 	#if defined(CONFIG_LCD_BOOT_SPLASH)
@@ -67,10 +71,7 @@ int main(void)
 		dbg_info("failed to initialize LCD frame buffer\n");
 	}
 	else {
-		ret = hlcdc_dma_start(vid.base);
-	}
-	if (ret) {
-		dbg_info("failed to start LCD DMA\n");
+		hlcdc_dma_start(vid.base);
 	}
 	#endif /* #ifdef CONFIG_LCD_BOOT_SPLASH */
 

@@ -248,17 +248,22 @@ GC_SECTIONS=--gc-sections
 
 # $(EXTRA_CC_ARGS) can be used to pass extra CC parameters to toolchain
 # For example, Yocto Project can pass the sysroot
-NOSTDINC_FLAGS := -nostdinc -isystem "$(shell "$(CC)" $(EXTRA_CC_ARGS) -print-file-name=include)"
+#NOSTDINC_FLAGS := -nostdinc -isystem "$(shell "$(CC)" $(EXTRA_CC_ARGS) -print-file-name=include)"
 
-CPPFLAGS=$(EXTRA_CC_ARGS) $(NOSTDINC_FLAGS) -ffunction-sections -g -Os -Wall \
+CPPFLAGS=$(EXTRA_CC_ARGS) -ffunction-sections -g -Os -Wall \
 	-mno-unaligned-access \
 	-fno-stack-protector -fno-common -fno-builtin -fno-jump-tables -fno-pie \
 	-I$(INCL) -Iinclude -Ifs/include \
 	-I$(CONFIG)/at91bootstrap-config \
 	-include $(CONFIG)/at91bootstrap-config/autoconf.h \
 	-DAT91BOOTSTRAP_VERSION=\"$(VERSION)$(REV)$(SCMINFO)\" -DCOMPILE_TIME="\"$(BUILD_DATE)\""
+CPPFLAGS += -mthumb
+CPPFLAGS += -mcpu=arm926ej-s
+CPPFLAGS += -mthumb-interwork -mfloat-abi=soft
+CPPFLAGS += -mfpu=vfp -L./libc.a
 
-ASFLAGS=$(EXTRA_CC_ARGS) -g -Os -Wall -I$(INCL) -Iinclude -include $(CONFIG)/at91bootstrap-config/autoconf.h
+
+ASFLAGS=$(EXTRA_CC_ARGS) -g -Os -Wall -I$(INCL) -Iinclude -include $(CONFIG)/at91bootstrap-config/autoconf.h 
 
 include	toplevel_cpp.mk
 include	device/device_cpp.mk
@@ -279,8 +284,8 @@ endif
 #    --cref:    add cross reference to map file
 #  -lc 	   : 	tells the linker to tie in newlib
 #  -lgcc   : 	tells the linker to tie in newlib
-LDFLAGS=$(EXTRA_CC_ARGS) -Map=$(BINDIR)/$(BOOT_NAME).map --cref -static
-LDFLAGS+=-T $(link_script) $(GC_SECTIONS) -Ttext $(LINK_ADDR)
+LDFLAGS=$(EXTRA_CC_ARGS) -Map=$(BINDIR)/$(BOOT_NAME).map --cref -static 
+LDFLAGS+=-T $(link_script) $(GC_SECTIONS) -Ttext $(LINK_ADDR)  
 
 REMOVE_SECTIONS=-R .note -R .comment -R .note.gnu.build-id
 

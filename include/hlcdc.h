@@ -132,7 +132,7 @@ struct hlcdc_dma_desc {
 };
 
 extern int hlcdc_init(void);
-extern int hlcdc_dma_start(unsigned long addr);
+extern void hlcdc_dma_start(unsigned long addr);
 
 #endif
 
