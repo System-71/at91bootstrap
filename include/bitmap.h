@@ -2,7 +2,7 @@
 #define FRAME_BUFFER_ADDR 0x2FE00000
 #define BMP_COPY_ADDR     0x2FF00000
 
-#define VID_SIZE_BYTES 300*240*2 // 300*240*16BPP/ (8bits/byte) [bytes]
+#define VID_SIZE_BYTES 320*240*2 // 320*240*16BPP/ (8bits/byte) [bytes]
 #define VID_BPP 16
 
 // uncomment to flip X axis

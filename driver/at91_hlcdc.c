@@ -160,19 +160,19 @@ int hlcdc_init(void){
 	/* Setup Control reg 3 */
 
 	// set Horizontal back porch width to 10 PCLK cycles
-	// set Horizontal front porch width to 38 PCLK cycles
+	// set Horizontal front porch width to 8 PCLK cycles
         val = hlcdc_readl(LCDC_LCDCFG3);
         hlcdc_writel(LCDC_LCDCFG3, val | (((10-1) << LCDC_LCDCFG3_HBPW_SHIFT) & LCDC_LCDCFG3_HBPW_MASK)
-			| ((38-1) & LCDC_LCDCFG3_HFPW_MASK));
+			| ((8-1) & LCDC_LCDCFG3_HFPW_MASK));
 
         val = hlcdc_readl(LCDC_LCDCFG3);
 	dbg_info("cfg3 = %x\n", val);
 
 	/* Setup Control reg 4 */
 
-	// 300V x 240H size
+	// 320V x 240H size
         val = hlcdc_readl(LCDC_LCDCFG4);
-        hlcdc_writel(LCDC_LCDCFG4, val | (((300-1) << LCDC_LCDCFG4_RPF_SHIFT) & LCDC_LCDCFG4_RPF_MASK)
+        hlcdc_writel(LCDC_LCDCFG4, val | (((320-1) << LCDC_LCDCFG4_RPF_SHIFT) & LCDC_LCDCFG4_RPF_MASK)
 			| ((240-1) & LCDC_LCDCFG4_PPL_MASK));
 
         val = hlcdc_readl(LCDC_LCDCFG4);

@@ -473,6 +473,9 @@ int load_kernel(struct image_info *image)
 	scratch_offset = "0x700000"; //TODO actually read offset from config using dual_bank_scratch_target()
 	spi_flash_read(&flash, 0x700000, 2, &sector[0]);
         target = sector[0];	
+	int b = sector[0];
+
+	dbg_info("b=%d\n", b);
 
 	char partition[20] = {'\0'};
 	int key=0;
@@ -489,18 +492,18 @@ int load_kernel(struct image_info *image)
 
 	dbg_info("\nTarget @ %s\n", scratch_offset);
 
-	switch(target){
-		case 0:
+	switch(b){
+		case 0x0:
 			target='1';
 			break;
-		case 1:
+		case 0xFF:
 			target='2';
 			break;
 		default:
 			target='1';
 	}
 
-	dbg_info("setting partition to %u\n", target);
+	dbg_info("setting partition to %d\n", (int) target);
 	bootargs[key] = (unsigned char) target;
 #endif
 

@@ -182,9 +182,11 @@ struct video_buf bitmap_frame_buffer_init() {
 		   		green = (px & stack_dib.green_mask) >> 8;
 		   		blue  = px & stack_dib.blue_mask;
 
-				red16   = ((unsigned int) ((red*0x1F) / 0x3F)) & 0x1F;
+				red16   = ((unsigned int) ((red*0x1F) / 0xFF)) & 0x1F;
 				green16 = ((unsigned int) ((green*0x3F) / 0xFF)) & 0x3F;
-				blue16  = ((unsigned int) ((blue*0x1F) / 0x3F)) & 0x1F;
+				blue16  = ((unsigned int) ((blue*0x1F) / 0xFF)) & 0x1F;
+
+				//dbg_info("red = %x, green = %x, blue = %x, red16 = %x, green16 = %x, blue16 = %x\n", red, green, blue, red16, green16, blue16);
 				
 #ifndef VID_X_MIRROR
 				frame[i + 1]   = 0xFF & ((red16 << 3) | ((0x38 & green16) >> 3));
