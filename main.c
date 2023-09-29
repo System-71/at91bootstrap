@@ -20,6 +20,9 @@
 #include "string.h"
 #include "bitmap.h"
 
+#if defined(CONFIG_LCD_SPI)
+#include "spi_lcd.h"
+#endif
 
 #ifdef CONFIG_LCD
 #include "hlcdc.h"
