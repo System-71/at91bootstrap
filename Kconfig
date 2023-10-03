@@ -402,7 +402,13 @@ config BOARD_QUIRK_SAMA7G5_EK
 config BOARD_QUIRK_SAM9X60_CURIOSITY
         bool "Quirks for SAM9X60_CURIOSITY board"
 
+config BOARD_QUIRK_SAM9X60_LIGHTNING
+	bool "Quirks for SAM9X60 Lightning board"
+	help
+	  We want to enable GPIO config from bootloader
 endchoice
+
+
 
 config LED_ON_BOARD
 	bool "There are LEDs on the board"
