@@ -292,7 +292,7 @@ static int pio_set_g_periph(unsigned pin, int config)
 	if (pio >= AT91C_NUM_PIO)
 		return -1;
 
-	if (config & PIO_PULLUP && config & PIO_PULLDOWN)
+	if ((config & PIO_PULLUP) && (config & PIO_PULLDOWN))
 		return -1;
 
 #ifdef CONFIG_CPU_HAS_PIO4
@@ -310,7 +310,7 @@ int pio_set_gpio_input(unsigned pin, int config)
 	if (pio >= AT91C_NUM_PIO)
 		return -1;
 
-	if (config & PIO_PULLUP && config & PIO_PULLDOWN)
+	if ((config & PIO_PULLUP) && (config & PIO_PULLDOWN))
 		return -1;
 
 #ifdef CONFIG_CPU_HAS_PIO4
@@ -323,11 +323,16 @@ int pio_set_gpio_input(unsigned pin, int config)
 
 	write_pio(pio, PIO_CFGR, mask);
 #else
+
+	write_pio(pio, PIO_WPSR, (AT91C_PIO_WPEN_WPKEY << AT91C_PIO_WPEN_SHIFT)); // disable write protection
 	write_pio(pio, ((config & PIO_DEGLITCH) ? PIO_IFER : PIO_IFDR), mask);
 
 	write_pio(pio, PIO_IDR, mask);
+
+	write_pio(pio, PIO_WPSR, (AT91C_PIO_WPEN_WPKEY << AT91C_PIO_WPEN_SHIFT)); // disable write protection
 	write_pio(pio, ((config & PIO_PULLUP) ? PIO_PPUER : PIO_PPUDR), mask);
 #ifdef CONFIG_CPU_HAS_PIO3
+	write_pio(pio, PIO_WPSR, (AT91C_PIO_WPEN_WPKEY << AT91C_PIO_WPEN_SHIFT)); // disable write protection
 	write_pio(pio, ((config & PIO_PULLDOWN) ? PIO_PPDER : PIO_PPDDR), mask);
 #endif
 	write_pio(pio, PIO_ODR, mask);

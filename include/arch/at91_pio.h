@@ -63,6 +63,7 @@
 #define PIO_PPUER	0x0064	/* Pull-up Enable Register */
 #define PIO_PPUSR	0x0068	/* Pull-up Status Register */
 /* 0x006c */
+#define	PIO_WPSR	0x00E4	/* PIO Write Protection Status Register */
 #ifndef CONFIG_CPU_HAS_PIO3
 #define PIO_ASR		0x0070	/* Peripheral Select Register 1 */
 #define PIO_BSR		0x0074	/* Peripheral Select Register 2 */
@@ -121,6 +122,8 @@
 #define	AT91C_PIO_CFGR_PCFS	(0x01 << 29)	/* Physical Configuration Freeze Status */
 #define	AT91C_PIO_CFGR_ICFS	(0x01 << 30)	/* Interrupt Configuration Freeze Status */
 #define	AT91C_PIO_CFGR_TAMPEN	(0x01 << 31)	/* Tamper Enable */
+#define AT91C_PIO_WPEN_WPKEY	0x50494F        /* Write Protection Password Key */
+#define AT91C_PIO_WPEN_SHIFT    8		/* Bit shift for Password Key Entry */
 
 /* Number of IO handled by one PIO controller */
 #define PIO_NUM_IO		32
