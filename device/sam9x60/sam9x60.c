@@ -374,6 +374,28 @@ void spi_lcd_init(void) {
 }
 #endif /* #ifdef CONFIG_LCD */
 
+
+#if defined(CONFIG_BOARD_QUIRK_SAM9X60_LIGHTNING)
+
+static void sam9x60_lightning_pin_config(void)
+{
+        const struct pio_desc gpio_pins[] = {
+                {"SAM-GPS-RESET", AT91C_PIN_PA(28), 0, PIO_PULLDOWN, PIO_OUTPUT},
+                {"SAM-GPS-TIMEPULSE", AT91C_PIN_PB(1), 0, PIO_DEFAULT, PIO_INPUT},
+                {"SAM-GPS-EXTINT", AT91C_PIN_PB(2), 0, PIO_DEFAULT, PIO_INPUT},
+                {"SAM-CHG-PGOOD", AT91C_PIN_PB(4), 0, PIO_PULLUP, PIO_INPUT},
+                {"SAM-NCHG", AT91C_PIN_PB(5), 0, PIO_PULLUP, PIO_INPUT},
+                {"SAM-PMIC-WDI", AT91C_PIN_PB(6), 0, PIO_PULLUP, PIO_OUTPUT},
+                {"SAM-SLEEP-REQ_PD1", AT91C_PIN_PD(1), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
+                {"SAM-SLEEP-REQ_PD19", AT91C_PIN_PD(19), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
+                {(char *)0, 0, 0, PIO_DEFAULT, PIO_PERIPH_A},
+        };
+
+	pio_configure(gpio_pins);
+	
+}
+#endif  /* #ifdef CONFIG_BOARD_QUIRK_SAM9X60_LIGHTNING */
+
 void hw_init(void)
 {
 	unsigned int reg;
@@ -449,9 +471,9 @@ void hw_init(void)
 	(void) spi_lcd_init();
 #endif
 
-#ifdef CONFIG_BOARD_SAM9X60_LIGHTNING
+//fdef CONFIG_BOARD_SAM9X60_LIGHTNING
 	(void) sam9x60_lightning_pin_config();
-#endif
+//#endif
 
 }
 
@@ -729,22 +751,4 @@ void mmu_tlb_init(unsigned int *tlb)
 }
 #endif /* #ifdef CONFIG_MMU */
 
-#if defined(CONFIG_BOARD_QUIRK_SAM9X60_LIGHTNING)
-void sam9x60_lightning_pin_config(void)
-{
-        const struct pio_desc gpio_pins[] = {
-                {"SAM-GPS-RESET", AT91C_PIN_PA(28), 0, PIO_DEFAULT, PIO_PERIPH_A},
-                {"SAM-GPS-TIMEPULSE", AT91C_PIN_PB(1), 0, PIO_DEFAULT, PIO_PERIPH_A},
-                {"SAM-GPS-EXTINT", AT91C_PIN_PB(2), 0, PIO_DEFAULT, PIO_PERIPH_A},
-                {"SAM-CHG-PGOOD", AT91C_PIN_PB(4), 0, PIO_DEFAULT, PIO_PERIPH_A},
-                {"SAM-NCHG", AT91C_PIN_PB(5), 0, PIO_DEFAULT, PIO_PERIPH_A},
-                {"SAM-PMIC-WDI", AT91C_PIN_PB(6), 0, PIO_DEFAULT, PIO_PERIPH_A},
-                {"SAM-SLEEP-REQ_PD1", AT91C_PIN_PD(1), 0, PIO_DEFAULT, PIO_PERIPH_A},
-                {"SAM-SLEEP-REQ_PD19", AT91C_PIN_PD(19), 0, PIO_DEFAULT, PIO_PERIPH_A},
-                {(char *)0, 0, 0, PIO_DEFAULT, PIO_PERIPH_A},
-        };
-
-        pio_configure(gpio_pins);
-}
-#endif  /* #ifdef CONFIG_BOARD_QUIRK_SAM9X60_LIGHTNING */
 
