@@ -14,6 +14,13 @@
 #define CDX_OUTPUT_PIN AT91C_PIN_PD(4)
 #define DISPEN_OUTPUT_PIN AT91C_PIN_PC(24)
 
+
+#define KD024_20 // IPS 2.4inch startek LCD display
+
+// uncomment for TFT display
+//#define KD024_4 // TFT 2.4inch startek LCD display
+
+
 static struct at91_flexcom flexcoms[] = {
         {AT91C_ID_FLEXCOM0, FLEXCOM_SPI, AT91C_BASE_FLEXCOM0},
         {AT91C_ID_FLEXCOM1, FLEXCOM_SPI, AT91C_BASE_FLEXCOM1},
@@ -62,6 +69,7 @@ int spi_send_data(unsigned int spi_base, u16 val, int command ) {
 	return (timeout==1) ? 1 : 0;
 }
 
+#ifdef KD024_20
 int spi_lcd_controller_init(int flx_number) {
 
 	/* toggle LCD_EN pin */
@@ -104,6 +112,179 @@ int spi_lcd_controller_init(int flx_number) {
 	spi_send_data(spi_base, (u16) 0x29, 0); 
 
 	//--------------------------------ST7789S Frame rate setting----------------------------------//
+
+	spi_send_data(spi_base, (u16) 0x36, 0);
+	spi_send_data(spi_base, (u16) 0x00, 1);
+
+	spi_send_data(spi_base, (u16) 0xb2, 0);
+	spi_send_data(spi_base, (u16) 0x00, 1);
+	spi_send_data(spi_base, (u16) 0x00, 1);
+	spi_send_data(spi_base, (u16) 0x00, 1);
+	spi_send_data(spi_base, (u16) 0x33, 1);
+	spi_send_data(spi_base, (u16) 0x33, 1);
+
+	spi_send_data(spi_base, (u16) 0xb7, 0);
+	spi_send_data(spi_base, (u16) 0x35, 1);
+
+	//---------------------------------ST7789S Power setting--------------------------------------//
+
+	spi_send_data(spi_base, (u16) 0xb8, 0);
+	spi_send_data(spi_base, (u16) 0x2f, 1);
+	spi_send_data(spi_base, (u16) 0x2b, 1);
+	spi_send_data(spi_base, (u16) 0x2f, 1);
+
+	spi_send_data(spi_base, (u16) 0xbb, 0);
+	spi_send_data(spi_base, (u16) 0x24, 1);//vcom
+
+	spi_send_data(spi_base, (u16) 0xc0, 0);
+	spi_send_data(spi_base, (u16) 0x2C, 1);
+
+	spi_send_data(spi_base, (u16) 0xc3, 0);
+	spi_send_data(spi_base, (u16) 0x10, 1);//17µ÷ÉîÇ³
+
+	spi_send_data(spi_base, (u16) 0xc4, 0);
+	spi_send_data(spi_base, (u16) 0x20, 1);
+
+	spi_send_data(spi_base, (u16) 0xc6, 0);
+	spi_send_data(spi_base, (u16) 0x11, 1);
+
+	spi_send_data(spi_base, (u16) 0xd0, 0);
+	spi_send_data(spi_base, (u16) 0xa4, 1);
+	spi_send_data(spi_base, (u16) 0xa1, 1);
+
+	spi_send_data(spi_base, (u16) 0xe8, 0);
+	spi_send_data(spi_base, (u16) 0x03, 1);
+
+	spi_send_data(spi_base, (u16) 0xe9, 0);
+	spi_send_data(spi_base, (u16) 0x0d, 1);
+	spi_send_data(spi_base, (u16) 0x12, 1);
+	spi_send_data(spi_base, (u16) 0x00, 1);
+
+	//--------------------------------ST7789S gamma setting---------------------------------------//
+	spi_send_data(spi_base, (u16) 0xe0, 0);
+	spi_send_data(spi_base, (u16) 0xd0, 1);
+	spi_send_data(spi_base, (u16) 0x00, 1);
+	spi_send_data(spi_base, (u16) 0x00, 1);
+	spi_send_data(spi_base, (u16) 0x08, 1);
+	spi_send_data(spi_base, (u16) 0x11, 1);
+	spi_send_data(spi_base, (u16) 0x1a, 1);
+	spi_send_data(spi_base, (u16) 0x2b, 1);
+	spi_send_data(spi_base, (u16) 0x33, 1);
+	spi_send_data(spi_base, (u16) 0x42, 1);
+	spi_send_data(spi_base, (u16) 0x26, 1);
+	spi_send_data(spi_base, (u16) 0x12, 1);
+	spi_send_data(spi_base, (u16) 0x21, 1);
+	spi_send_data(spi_base, (u16) 0x2f, 1);
+	spi_send_data(spi_base, (u16) 0x11, 1);
+
+	spi_send_data(spi_base, (u16) 0xe1, 0);
+	spi_send_data(spi_base, (u16) 0xd0, 1);
+	spi_send_data(spi_base, (u16) 0x02, 1);
+	spi_send_data(spi_base, (u16) 0x09, 1);
+	spi_send_data(spi_base, (u16) 0x0d, 1);
+	spi_send_data(spi_base, (u16) 0x0d, 1);
+	spi_send_data(spi_base, (u16) 0x27, 1);
+	spi_send_data(spi_base, (u16) 0x2b, 1);
+	spi_send_data(spi_base, (u16) 0x33, 1);
+	spi_send_data(spi_base, (u16) 0x42, 1);
+	spi_send_data(spi_base, (u16) 0x17, 1);
+	spi_send_data(spi_base, (u16) 0x12, 1);
+	spi_send_data(spi_base, (u16) 0x11, 1);
+	spi_send_data(spi_base, (u16) 0x2f, 1);
+	spi_send_data(spi_base, (u16) 0x31, 1);
+
+	spi_send_data(spi_base, (u16) 0x21, 0);
+
+
+	//*********SET RGB Interfae***************
+
+	spi_send_data(spi_base, (u16) 0xB0, 0); 
+	spi_send_data(spi_base, (u16) 0x11, 1); //set RGB interface and DE mode.
+	spi_send_data(spi_base, (u16) 0x00, 1); 
+
+	spi_send_data(spi_base, (u16) 0xB1, 0); 
+	spi_send_data(spi_base, (u16) 0xE0, 1); // set DE mode ; SET Hs,Vs,DE,DOTCLK signal polarity, 
+	spi_send_data(spi_base, (u16) 0x08, 1); //VBP 
+	spi_send_data(spi_base, (u16) 0x14, 1); //HBP
+
+	spi_send_data(spi_base, (u16) 0x3a, 0); 
+	spi_send_data(spi_base, (u16) 0x55, 1); //18 RGB ,55-16BIT RGB
+
+	//***********************
+
+	spi_send_data(spi_base, (u16) 0x2a, 0);  // frame rate control
+	spi_send_data(spi_base, (u16) 0x00, 1);
+	spi_send_data(spi_base, (u16) 0x00, 1);
+	spi_send_data(spi_base, (u16) 0x00, 1); 
+	spi_send_data(spi_base, (u16) 0xEF, 1); 
+
+	spi_send_data(spi_base, (u16) 0x2b, 0); // display function control
+	spi_send_data(spi_base, (u16) 0x00, 1);
+	spi_send_data(spi_base, (u16) 0x00, 1);
+	spi_send_data(spi_base, (u16) 0x01, 1); 
+	spi_send_data(spi_base, (u16) 0x3f, 1); 
+
+
+	//************************
+	spi_send_data(spi_base, (u16) 0x11, 0); 
+	
+	wait_interval_timer(120);
+
+	spi_send_data(spi_base, (u16) 0x29, 0); //display on
+	spi_send_data(spi_base, (u16) 0x2c, 0); 
+
+	dbg_info("LCD display initialized\n");
+
+	return 0;
+}
+#endif //KD024_20
+
+#ifdef KD024_4 // TFT display
+int spi_lcd_controller_init(int flx_number) {
+
+	/* toggle LCD_EN pin */
+        pio_set_value(DISPEN_OUTPUT_PIN, 0);
+        wait_interval_timer(200);
+        pio_set_value(DISPEN_OUTPUT_PIN, 1);
+        wait_interval_timer(200);
+
+	/* initialize SPI controller */
+	unsigned int spi_base = flexcoms[flx_number].addr;
+	dbg_info("SPI_BASE=%x\n", (unsigned int) spi_base);
+	
+	unsigned int reg = 1;
+        writel(reg, spi_base + 0x400); // set SPI_CR enable bit
+
+	/* unlock SPI write protection mode register */
+        unsigned int key = 0x53504900;
+	reg = key;
+	reg &= ((unsigned int) 0xFFFFFFFE); // clear WPEN bit 0
+        writel(reg, spi_base + 0x4E4);
+
+	reg = (1) | (0<< 3) ; // set HOST mode, GCLK as SPI clock source
+        writel(reg, spi_base + 0x404); // write SPI_MR register
+
+        reg = readl(spi_base + 0x404); // read SPI_MR register
+        dbg_info("SPI_MR=%x\n", reg);
+
+
+        reg = (0x64 << 8) | (0 << 4) | (1 << 2) | (1 << 1); // configure SPI clock to GCK/100 = 2MHz, set to 8-bit transfers, set CS high after each transfer, sample on rising clock edge
+        writel(reg, spi_base + 0x430); // write SPI_MODE register
+
+        reg = readl(spi_base + 0x430); // read SPI_CHIP_SELECT register
+
+        reg = readl(spi_base + 0x410); // read SPI_STATUS register
+
+	spi_send_data(spi_base, (u16) 0x11, 0);
+
+	wait_interval_timer(200);
+	
+	spi_send_data(spi_base, (u16) 0x29, 0); 
+
+	//--------------------------------ST7789S Frame rate setting----------------------------------//
+
+	spi_send_data(spi_base, (u16) 0x36, 0);
+	spi_send_data(spi_base, (u16) 0x0c, 1);
 
 	spi_send_data(spi_base, (u16) 0xb2, 0);
 	spi_send_data(spi_base, (u16) 0x0c, 1);
@@ -191,3 +372,4 @@ int spi_lcd_controller_init(int flx_number) {
 
 	return 0;
 }
+#endif //KD024_4
