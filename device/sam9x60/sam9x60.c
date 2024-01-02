@@ -409,7 +409,7 @@ void hw_init(void)
 #endif
 
 	/* Configure & Enable PLLA */
-	plla_config.mul = 49;
+	plla_config.mul = 32;//49;
 	plla_config.div = PLLA_DIV;
 	plla_config.count = PLLA_COUNT;
 	plla_config.fracr = 0;
