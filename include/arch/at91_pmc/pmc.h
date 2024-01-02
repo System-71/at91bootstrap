@@ -24,6 +24,7 @@
 /* 0x0C Reversed */
 #define PMC_MOR		0x20	/* Main Oscillator Register */
 #define PMC_MCFR	0x24	/* Main Clock  Frequency Register */
+#define PMC_CPU_CKR     0x28    /* Processor Clock Frequency Register */
 /* 0x34 Reserved */
 #define PMC_USB		0x38	/* USB clock register */
 #define PMC_SMD		0x3C	/* SMD clock register */
