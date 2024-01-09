@@ -445,6 +445,15 @@ void hw_init(void)
 	/* Init timer */
 	timer_init();
 
+	/* enable timer counters, set source from GCK */
+	/* TC0 */
+	pmc_enable_periph_clock(AT91C_ID_TCB, PMC_PERIPH_CLK_DIVIDER_NA);
+	pmc_enable_generic_clock(AT91C_ID_TCB, GCK_CSS_UPLL_CLK, (180-1)); // use UPLL for timers
+	/* TC1 */
+	pmc_enable_periph_clock(AT91C_ID_TC1, PMC_PERIPH_CLK_DIVIDER_NA);
+	pmc_enable_generic_clock(AT91C_ID_TC1, GCK_CSS_UPLL_CLK, (180-1)); // use UPLL for timers
+
+
 	/* Initialize dbgu */
 	initialize_dbgu();
 
