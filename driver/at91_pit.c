@@ -32,6 +32,7 @@ int timer_init(void)
 	/* Enable PITC Clock */
 #ifdef AT91C_ID_PIT
 	pmc_enable_periph_clock(AT91C_ID_PIT, PMC_PERIPH_CLK_DIVIDER_NA);
+//	pmc_enable_generic_clock(AT91C_ID_PIT, GCK_CSS_MAIN_CLK, 0);
 #else
 	pmc_enable_periph_clock(AT91C_ID_SYS, PMC_PERIPH_CLK_DIVIDER_NA);
 #endif

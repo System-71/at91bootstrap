@@ -12,6 +12,7 @@
 #include "arch/at91_ddrsdrc.h"
 #include "gpio.h"
 #include "pmc.h"
+#include "arch/at91_dbgu.h"
 #include "usart.h"
 #include "debug.h"
 #include "ddramc.h"
@@ -27,6 +28,8 @@
 #include "led.h"
 #include "nand.h"
 #include "hlcdc.h"
+#include "../../driver/pmc/clk-common.h"
+#include "dram_helpers.h"
 
 #ifdef CONFIG_MMU
 #include "mmu_cp15.h"
@@ -147,6 +150,7 @@ static void at91_dbgu_hw_init(void)
 	pio_configure(dbgu_pins);
 #if CONFIG_CONSOLE_INDEX == 0
 	pmc_enable_periph_clock(AT91C_ID_DBGU, PMC_PERIPH_CLK_DIVIDER_NA);
+	pmc_enable_generic_clock(AT91C_ID_DBGU, GCK_CSS_MAIN_CLK, 0); // GCK must be < MCK/3
 #else
 	usart_base = flexcoms[FLEXCOM_USART_INDEX].addr;
 	flexcoms[FLEXCOM_USART_INDEX].mode = FLEXCOM_USART;
@@ -159,7 +163,11 @@ static void at91_dbgu_hw_init(void)
 static void initialize_dbgu(void)
 {
 	at91_dbgu_hw_init();
-	usart_init(BAUDRATE(MASTER_CLOCK, BAUD_RATE));
+
+	usart_init(BAUDRATE(MAIN_CLOCK, BAUD_RATE));
+
+	unsigned int regval = readl(AT91C_BASE_DBGU + DBGU_MR);
+	writel(regval | AT91C_DBGU_BRSRCCK_GENERIC_CLK, AT91C_BASE_DBGU + DBGU_MR); // need to switch clock source after DBGU init complete for some reason
 }
 
 #if defined CONFIG_TWI
@@ -386,7 +394,11 @@ static void sam9x60_lightning_pin_config(void)
                 {"SAM-CHG-PGOOD", AT91C_PIN_PB(4), 0, PIO_PULLUP, PIO_INPUT},
                 {"SAM-NCHG", AT91C_PIN_PB(5), 0, PIO_PULLUP, PIO_INPUT},
                 {"SAM-PMIC-WDI", AT91C_PIN_PB(6), 0, PIO_PULLUP, PIO_OUTPUT},
-                {"SAM-SLEEP-REQ_PD1", AT91C_PIN_PD(1), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
+                {"SW-4-IN", AT91C_PIN_PA(2), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
+                {"SW-3-IN", AT91C_PIN_PA(4), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
+                {"SW-2-IN", AT91C_PIN_PA(8), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
+                {"SW-1-IN", AT91C_PIN_PA(25), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
+		{"SAM-SLEEP-REQ_PD1", AT91C_PIN_PD(1), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
                 {"SAM-SLEEP-REQ_PD19", AT91C_PIN_PD(19), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
                 {(char *)0, 0, 0, PIO_DEFAULT, PIO_PERIPH_A},
         };
@@ -409,10 +421,10 @@ void hw_init(void)
 #endif
 
 	/* Configure & Enable PLLA */
-	plla_config.mul = 32;//49;
+	plla_config.mul = 49;
 	plla_config.div = PLLA_DIV;
 	plla_config.count = PLLA_COUNT;
-	plla_config.fracr = 0;
+	plla_config.fracr = 0;//0x155500;
 	plla_config.acr = AT91C_PLL_ACR_DEFAULT_PLLA;
 	pmc_sam9x60_cfg_pll(PLL_ID_PLLA, &plla_config);
 
@@ -427,14 +439,15 @@ void hw_init(void)
 	flexcoms_init(flexcoms);
 #endif
 
-	/* Initialize dbgu */
-	initialize_dbgu();
-
 	/* Enable External Reset */
 	writel(AT91C_RSTC_KEY_UNLOCK | AT91C_RSTC_URSTEN, AT91C_BASE_RSTC + RSTC_RMR);
 
 	/* Init timer */
 	timer_init();
+
+	/* Initialize dbgu */
+	initialize_dbgu();
+
 
 #ifdef CONFIG_TWI
 	twi_init();
@@ -471,9 +484,22 @@ void hw_init(void)
 	(void) spi_lcd_init();
 #endif
 
-//fdef CONFIG_BOARD_SAM9X60_LIGHTNING
 	(void) sam9x60_lightning_pin_config();
-//#endif
+
+	const struct pio_desc flx_pins[][3] = {
+		{ // FLEXCOM0
+			{"FLX_IO0", AT91C_PIN_PA(0), 0, PIO_DEFAULT, PIO_PERIPH_A},
+			{"FLX_IO1", AT91C_PIN_PA(1), 0, PIO_DEFAULT, PIO_PERIPH_A},
+			{(char *)0, 0, 0, PIO_DEFAULT, PIO_PERIPH_A},
+		},
+	};
+
+	pio_configure(flx_pins[0]);
+        flexcoms[0].mode = FLEXCOM_USART;
+        flexcom_init(0);
+
+	pmc_enable_periph_clock(AT91C_ID_FLEXCOM0, PMC_PERIPH_CLK_DIVIDER_NA);
+	pmc_enable_generic_clock(AT91C_ID_FLEXCOM0, GCK_CSS_MAIN_CLK, 0); // GCK must be < MCK/3
 
 }
 
