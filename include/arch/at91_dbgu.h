@@ -56,6 +56,9 @@
 #define 	AT91C_DBGU_CHMODE_AUTO			(0x1UL << 14)
 #define 	AT91C_DBGU_CHMODE_LOCAL			(0x2UL << 14)
 #define 	AT91C_DBGU_CHMODE_REMOTE		(0x3UL << 14)
+#define AT91C_DBGU_BRSRCCK 	(0x1UL << 12)
+#define		AT91C_DBGU_BRSRCCK_PERIPH_CLK		(0x0UL << 12)
+#define		AT91C_DBGU_BRSRCCK_GENERIC_CLK		(0x1UL << 12)
 
 /* -------- DBGU_IER : (DBGU Offset: 0x8) Debug Unit Interrupt Enable Register -------- */
 #define AT91C_DBGU_RXRDY	(0x1UL <<  0)
