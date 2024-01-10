@@ -412,6 +412,7 @@ void hw_init(void)
 {
 	unsigned int reg;
 	struct pmc_pll_cfg plla_config;
+	struct pmc_pll_cfg upll_config;
 
 	/* Disable watchdog */
 	at91_disable_wdt();
@@ -448,10 +449,10 @@ void hw_init(void)
 	/* enable timer counters, set source from GCK */
 	/* TC0 */
 	pmc_enable_periph_clock(AT91C_ID_TCB, PMC_PERIPH_CLK_DIVIDER_NA);
-	pmc_enable_generic_clock(AT91C_ID_TCB, GCK_CSS_UPLL_CLK, (180-1)); // use UPLL for timers
+	pmc_enable_generic_clock(AT91C_ID_TCB, GCK_CSS_UPLL_CLK, 96-1); // use MAINCK for timers
 	/* TC1 */
 	pmc_enable_periph_clock(AT91C_ID_TC1, PMC_PERIPH_CLK_DIVIDER_NA);
-	pmc_enable_generic_clock(AT91C_ID_TC1, GCK_CSS_UPLL_CLK, (180-1)); // use UPLL for timers
+	pmc_enable_generic_clock(AT91C_ID_TC1, GCK_CSS_UPLL_CLK, 96-1); // use MAINCK for timers
 
 
 	/* Initialize dbgu */
@@ -509,6 +510,14 @@ void hw_init(void)
 
 	pmc_enable_periph_clock(AT91C_ID_FLEXCOM0, PMC_PERIPH_CLK_DIVIDER_NA);
 	pmc_enable_generic_clock(AT91C_ID_FLEXCOM0, GCK_CSS_MAIN_CLK, 0); // GCK must be < MCK/3
+
+	/* Configure & Enable UPLL */
+	upll_config.mul = 39;
+	upll_config.div = PLLA_DIV;
+	upll_config.count = 0;
+	upll_config.fracr = 0;
+	upll_config.acr = AT91C_PLL_ACR_DEFAULT_UTMI;
+	pmc_sam9x60_cfg_pll(PLL_ID_UPLL, &upll_config);
 
 }
 
