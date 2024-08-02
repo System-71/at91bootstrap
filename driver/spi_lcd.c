@@ -114,7 +114,7 @@ int spi_lcd_controller_init(int flx_number) {
 	//--------------------------------ST7789S Frame rate setting----------------------------------//
 
 	spi_send_data(spi_base, (u16) 0x36, 0);
-	spi_send_data(spi_base, (u16) 0x00, 1);
+	spi_send_data(spi_base, (u16) 0xD4, 1);
 
 	spi_send_data(spi_base, (u16) 0xb2, 0);
 	spi_send_data(spi_base, (u16) 0x00, 1);
@@ -223,7 +223,6 @@ int spi_lcd_controller_init(int flx_number) {
 	spi_send_data(spi_base, (u16) 0x00, 1);
 	spi_send_data(spi_base, (u16) 0x01, 1); 
 	spi_send_data(spi_base, (u16) 0x3f, 1); 
-
 
 	//************************
 	spi_send_data(spi_base, (u16) 0x11, 0); 
