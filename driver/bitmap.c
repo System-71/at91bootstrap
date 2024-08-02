@@ -159,12 +159,20 @@ struct video_buf bitmap_frame_buffer_init() {
 	dbg_info("pixel address = %x\n", (int) bmp->pixels);
 	dbg_info("bpp = %d\n", (int)bpp);
 
-	int i = 0;
+	int limit = stack_dib.width;
+	int start = 0;
+	int line = 0;
+	int key = 0;
 #ifdef VID_X_MIRROR
-	int physical_pos = stack_dib.width;
-	int key = ( VID_BPP / 8 )*stack_dib.width;
-	int line =1;
+	start = limit;
+	limit = 0;
+	line = 1;
 #endif
+#ifdef VID_Y_MIRROR
+	line = (num_bytes/4) / (stack_dib.width) - 1;
+#endif
+	int physical_pos = start;
+
 	for (int j=0; j < VID_SIZE_BYTES; j++) {
 		/* blank the screen */
 		frame[j] = 0x00;
@@ -185,27 +193,23 @@ struct video_buf bitmap_frame_buffer_init() {
 				red16   = ((unsigned int) ((red*0x1F) / 0xFF)) & 0x1F;
 				green16 = ((unsigned int) ((green*0x3F) / 0xFF)) & 0x3F;
 				blue16  = ((unsigned int) ((blue*0x1F) / 0xFF)) & 0x1F;
+				
+				key = (VID_BPP/8)*(line)*(stack_dib.width);
+				key += (limit > start) ? physical_pos*(VID_BPP/8) : -(stack_dib.width-physical_pos + 1)*(VID_BPP/8);
+				
+				frame[key+1] = 0xFF & ((red16 << 3) | ((0x38 & green16) >> 3));
+				frame[key] = 0xFF & (((0x7 & green16) << 5) | blue16);
 
-				//dbg_info("red = %x, green = %x, blue = %x, red16 = %x, green16 = %x, blue16 = %x\n", red, green, blue, red16, green16, blue16);
+				physical_pos += (limit > start) ? 1 : -1;
 				
-#ifndef VID_X_MIRROR
-				frame[i + 1]   = 0xFF & ((red16 << 3) | ((0x38 & green16) >> 3));
-				frame[i]   = 0xFF & (((0x7 & green16) << 5) | blue16);
+				if ( physical_pos == limit ) {
+					physical_pos = start;
+#ifdef VID_Y_MIRROR
+					line--;
 #else
-				key = (VID_BPP/8)*(line)*(stack_dib.width) - (stack_dib.width-physical_pos)*(VID_BPP/8);
-				
-				frame[key-1] = 0xFF & ((red16 << 3) | ((0x38 & green16) >> 3));
-				frame[key-2] = 0xFF & (((0x7 & green16) << 5) | blue16);
-				
-				if ( physical_pos == 1 ) {
-					physical_pos = stack_dib.width;
 					line++;
-				}
-				else {
-					physical_pos--;
-				}
 #endif
-				i+=( VID_BPP / 8 );
+				}				
 				break; 
 		default:
 			dbg_info("Bitmap uses unsupported bits per pixel\n");

@@ -6,7 +6,10 @@
 #define VID_BPP 16
 
 // uncomment to flip X axis
-#define VID_X_MIRROR
+//#define VID_X_MIRROR
+
+// uncomment to flip Y axis
+#define VID_Y_MIRROR
 
 struct bitmap_header {
 	unsigned char header[2];
