@@ -307,7 +307,7 @@ void twi_init()
 
 #ifdef CONFIG_LCD
 
-#define ATMEL_LCDC_GCKDIV_VALUE     1
+#define ATMEL_LCDC_GCKDIV_VALUE     4
 void at91_lcdc_hw_init(void)
 {
 	dbg_info("configuring LCD pins and peripheral clock\n");
@@ -347,7 +347,7 @@ void at91_lcdc_hw_init(void)
 
 	pmc_enable_periph_clock(AT91C_ID_LCDC, PMC_PERIPH_CLK_DIVIDER_NA);
 	pmc_enable_generic_clock(AT91C_ID_LCDC,
-				 GCK_CSS_MCK_CLK,
+				 GCK_CSS_UPLL_CLK,
 				 ATMEL_LCDC_GCKDIV_VALUE);
 }
 
@@ -724,12 +724,30 @@ void mmu_tlb_init(unsigned int *tlb)
 	                  | TTB_SECT_SBO
 	                  | TTB_TYPE_SECT;
 
+	/* 0x20000000: EBI Chip Select 1 / DDR CS kernel region*/
+	for (addr = 0x200; addr < 0x210; addr++)
+		tlb[addr] = TTB_SECT_ADDR(addr << 20)
+	                  | TTB_SECT_AP_FULL_ACCESS
+	                  | TTB_SECT_DOMAIN(0xf)
+	                  | TTB_SECT_STRONGLY_ORDERED
+	                  | TTB_SECT_SBO
+	                  | TTB_TYPE_SECT;
+
 	/* 0x20000000: EBI Chip Select 1 / DDR CS */
-	for (addr = 0x200; addr < 0x300; addr++)
+	for (addr = 0x210; addr < 0x2FB; addr++)
 		tlb[addr] = TTB_SECT_ADDR(addr << 20)
 	                  | TTB_SECT_AP_FULL_ACCESS
 	                  | TTB_SECT_DOMAIN(0xf)
 	                  | TTB_SECT_CACHEABLE_WT
+	                  | TTB_SECT_SBO
+	                  | TTB_TYPE_SECT;
+
+	/* 0x2FB00000: EBI Chip Select 1 / DDR CS - non cacheable */
+	for (addr = 0x2FB; addr < 0x300; addr++)
+		tlb[addr] = TTB_SECT_ADDR(addr << 20)
+	                  | TTB_SECT_AP_FULL_ACCESS
+	                  | TTB_SECT_DOMAIN(0xf)
+	                  | TTB_SECT_STRONGLY_ORDERED
 	                  | TTB_SECT_SBO
 	                  | TTB_TYPE_SECT;
 
@@ -768,6 +786,15 @@ void mmu_tlb_init(unsigned int *tlb)
 	                  | TTB_SECT_STRONGLY_ORDERED
 	                  | TTB_SECT_SBO
 	                  | TTB_TYPE_SECT;
+
+	/* 0x70000000: QSPI MEM */
+	for (addr = 0x700; addr < 0x800; addr++)
+		tlb[addr] = TTB_SECT_ADDR(addr << 20)
+	                  | TTB_SECT_AP_FULL_ACCESS
+	                  | TTB_SECT_DOMAIN(0xf)
+	                  | TTB_SECT_STRONGLY_ORDERED
+	                  | TTB_SECT_SBO
+	                  | TTB_TYPE_SECT;	
 
 	/* 0xf0000000: Peripherals */
 	tlb[0xf00] = TTB_SECT_ADDR(0xf0000000)
