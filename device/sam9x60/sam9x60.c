@@ -389,17 +389,21 @@ static void sam9x60_lightning_pin_config(void)
 {
         const struct pio_desc gpio_pins[] = {
                 {"SAM-GPS-RESET", AT91C_PIN_PA(28), 0, PIO_PULLDOWN, PIO_OUTPUT},
-                {"SAM-GPS-TIMEPULSE", AT91C_PIN_PB(1), 0, PIO_DEFAULT, PIO_INPUT},
+                {"SAM-GPS-TIMEPULSE", AT91C_PIN_PB(15), 0, PIO_DEFAULT, PIO_INPUT},
                 {"SAM-GPS-EXTINT", AT91C_PIN_PB(2), 0, PIO_DEFAULT, PIO_INPUT},
                 {"SAM-CHG-PGOOD", AT91C_PIN_PB(4), 0, PIO_PULLUP, PIO_INPUT},
                 {"SAM-NCHG", AT91C_PIN_PB(5), 0, PIO_PULLUP, PIO_INPUT},
                 {"SAM-PMIC-WDI", AT91C_PIN_PB(6), 0, PIO_PULLUP, PIO_OUTPUT},
                 {"SW-4-IN", AT91C_PIN_PA(2), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
                 {"SW-3-IN", AT91C_PIN_PA(4), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
-                {"SW-2-IN", AT91C_PIN_PA(8), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
+                {"SW-2-IN", AT91C_PIN_PA(3), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
                 {"SW-1-IN", AT91C_PIN_PA(25), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
 		{"SAM-SLEEP-REQ_PD1", AT91C_PIN_PD(1), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
                 {"SAM-SLEEP-REQ_PD19", AT91C_PIN_PD(19), 0, PIO_DEFAULT, PIO_INPUT}, // no PULL
+                {"ATWILC-nRESET", AT91C_PIN_PA(22), 0, PIO_PULLDOWN, PIO_OUTPUT},
+                {"ATWILC-CHIP-EN", AT91C_PIN_PB(7), 0, PIO_PULLDOWN, PIO_OUTPUT},
+                {"ATWILC-WIFI-INT", AT91C_PIN_PB(11), 0, PIO_PULLUP, PIO_INPUT},
+                {"ATWILC-SENSE-INT", AT91C_PIN_PB(12), 0, PIO_PULLUP, PIO_INPUT},
                 {(char *)0, 0, 0, PIO_DEFAULT, PIO_PERIPH_A},
         };
 
