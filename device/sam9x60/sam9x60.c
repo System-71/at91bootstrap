@@ -404,6 +404,7 @@ static void sam9x60_lightning_pin_config(void)
                 {"ATWILC-CHIP-EN", AT91C_PIN_PB(7), 0, PIO_PULLDOWN, PIO_OUTPUT},
                 {"ATWILC-WIFI-INT", AT91C_PIN_PB(11), 0, PIO_PULLUP, PIO_INPUT},
                 {"ATWILC-SENSE-INT", AT91C_PIN_PB(12), 0, PIO_PULLUP, PIO_INPUT},
+                {"ATWILC-RTC-CLOCK", AT91C_PIN_PB(10), 0, PIO_DEFAULT, PIO_PERIPH_B},
                 {(char *)0, 0, 0, PIO_DEFAULT, PIO_PERIPH_A},
         };
 
@@ -499,6 +500,10 @@ void hw_init(void)
 #endif
 
 	(void) sam9x60_lightning_pin_config();
+
+#ifdef CONFIG_PCK_RTC
+	(void) pmc_cfg_pck(0, 1, 0); // set PCK[0] to track TD_SLCK without any prescaling
+#endif
 
 	const struct pio_desc flx_pins[][3] = {
 		{ // FLEXCOM0
