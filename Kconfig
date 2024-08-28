@@ -408,6 +408,23 @@ config BOARD_QUIRK_SAM9X60_LIGHTNING
 	  We want to enable GPIO config from bootloader
 endchoice
 
+menu "Programmable clock output"
+	depends on BOARD_QUIRK_SAM9X60_LIGHTNING
+choice 
+	prompt "PCK clock source enable"
+	default PCK_NONE
+
+config PCK_NONE
+	bool "do not enable programmable clock output"
+
+config PCK_RTC
+	bool "enable programmable clock to track TD_SLCLK"
+	help
+	  This board design has peripherals which expect 32.68KHz clock from SOC,
+	  we therefore enable programmable output clock 0 (PCK[0]) to track TD_SCLK
+endchoice
+endmenu
+
 
 
 config LED_ON_BOARD
