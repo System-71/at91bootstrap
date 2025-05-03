@@ -375,7 +375,7 @@ int load_kernel(struct image_info *image)
 	int ret;
 	unsigned int mem_size;
 #ifdef CONFIG_LINUX_IMAGE_DUAL_BOOT
-	unsigned char* scratch_offset;
+	char* scratch_offset;
 	unsigned char sector[2];
 	unsigned char target;
 #endif 
@@ -470,12 +470,13 @@ int load_kernel(struct image_info *image)
                 return -1;
         }
 
-	scratch_offset = "0x700000"; //TODO actually read offset from config using dual_bank_scratch_target()
-	spi_flash_read(&flash, 0x700000, 2, &sector[0]);
-        target = sector[0];	
+	scratch_offset = (char*) dual_bank_scratch_target();
+	dbg_info("addr = %x\n", (int) atoh(scratch_offset+2));
+	spi_flash_read(&flash, atoh(scratch_offset+2), 2, &sector[0]);
+	target = sector[0];
 	int b = sector[0];
 
-	dbg_info("b=%d\n", b);
+	dbg_info("scratch bit = %d\n", b);
 
 	char partition[20] = {'\0'};
 	int key=0;
@@ -503,7 +504,7 @@ int load_kernel(struct image_info *image)
 			target='1';
 	}
 
-	dbg_info("setting partition to %d\n", (int) target);
+	dbg_info("setting partition to %c\n", (int) target);
 	bootargs[key] = (unsigned char) target;
 #endif
 
